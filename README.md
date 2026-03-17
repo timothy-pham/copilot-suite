@@ -22,6 +22,10 @@ Or run locally with npx:
 ```bash
 npx copilot-master-provisioner --project /path/to/your/project
 ```
+If you omit `--project`, it will use the current working directory:
+```bash
+npx copilot-master-provisioner
+```
 
 Install directly from a private or SSH Git repo:
 ```bash
