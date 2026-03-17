@@ -11,6 +11,10 @@
 - Keep modules focused on a single responsibility.
 - Use explicit names and avoid ambiguous abbreviations.
 - Preserve established formatting conventions in this repository.
+- Follow SOLID principles where applicable.
+- Keep code DRY; avoid duplicated logic.
+- Prefer KISS over complex abstractions.
+- Avoid YAGNI: do not build unused features.
 
 ## Error Handling
 - Treat errors as data: return explicit error types/results where possible.

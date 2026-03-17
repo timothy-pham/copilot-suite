@@ -122,14 +122,25 @@ function stepStackDetect(state, projectPath) {
   }
 }
 
-async function stepSkills(state, projectPath, repoUrl, cacheDir, nonInteractive, skip) {
+async function stepSkills(state, projectPath, repoUrl, cacheDir, root, nonInteractive, skip) {
   printHeader('Skills Sync');
   if (skip) {
     console.log('Skipped skills sync.');
     return;
   }
+  const bundledRoot = path.join(root, 'skills', 'bundled');
+  let bundledInstalled = [];
+  if (fs.existsSync(bundledRoot)) {
+    const bundled = discoverSkills(bundledRoot);
+    if (bundled.length) {
+      const indices = Array.from({ length: bundled.length }, (_, i) => i + 1);
+      bundledInstalled = installSkills(bundled, indices, projectPath);
+      console.log(`Installed ${bundledInstalled.length} bundled skills.`);
+    }
+  }
   if (!state.getData('git_available', false)) {
     console.log('Skipping skills: git not available.');
+    if (bundledInstalled.length) state.setData('skills_installed', bundledInstalled);
     return;
   }
   let repoPath;
@@ -137,6 +148,7 @@ async function stepSkills(state, projectPath, repoUrl, cacheDir, nonInteractive,
     repoPath = syncSkillsRepo(repoUrl, cacheDir);
   } catch (err) {
     console.log(String(err.message || err));
+    if (bundledInstalled.length) state.setData('skills_installed', bundledInstalled);
     return;
   }
   const skills = discoverSkills(repoPath);
@@ -152,12 +164,14 @@ async function stepSkills(state, projectPath, repoUrl, cacheDir, nonInteractive,
 
   if (nonInteractive) {
     console.log('Non-interactive mode: skipping skill install.');
+    if (bundledInstalled.length) state.setData('skills_installed', bundledInstalled);
     return;
   }
 
   const selection = (await ask("Select skills (e.g., 1,2-4), 'all', or Enter to skip: ")).trim().toLowerCase();
   if (!selection) {
     console.log('No skills selected.');
+    if (bundledInstalled.length) state.setData('skills_installed', bundledInstalled);
     return;
   }
 
@@ -169,18 +183,21 @@ async function stepSkills(state, projectPath, repoUrl, cacheDir, nonInteractive,
       indices = parseSelection(selection, skills.length);
     } catch (_err) {
       console.log('Invalid selection.');
+      if (bundledInstalled.length) state.setData('skills_installed', bundledInstalled);
       return;
     }
   }
 
   if (!indices.length) {
     console.log('No valid selections.');
+    if (bundledInstalled.length) state.setData('skills_installed', bundledInstalled);
     return;
   }
 
   const installed = installSkills(skills, indices, projectPath);
-  state.setData('skills_installed', installed);
-  console.log(`Installed ${installed.length} skills.`);
+  const combined = [...bundledInstalled, ...installed];
+  state.setData('skills_installed', combined);
+  console.log(`Installed ${installed.length} skills from remote.`);
 }
 
 async function stepVscode(state, templatePath, nonInteractive, skip) {
@@ -233,7 +250,7 @@ async function main() {
     ['stack_detect', () => stepStackDetect(state, projectPath)],
     [
       'skills_sync',
-      () => stepSkills(state, projectPath, args.skillsRepo, cacheRoot, args.nonInteractive, args.skipSkills),
+      () => stepSkills(state, projectPath, args.skillsRepo, cacheRoot, root, args.nonInteractive, args.skipSkills),
     ],
     [
       'vscode_config',

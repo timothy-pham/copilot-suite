@@ -23,6 +23,11 @@ Or run locally with npx:
 npx copilot-master-provisioner --project /path/to/your/project
 ```
 
+Install directly from a private or SSH Git repo:
+```bash
+npm install -g git+ssh://git@github.com:timothy-pham/copilot-suite.git
+```
+
 You can also run the bundled setup script:
 ```bash
 ./setup.sh --project /path/to/your/project
@@ -61,6 +66,7 @@ The CLI writes to the user-level `settings.json` (with a `.bak` backup). The set
 
 ## Skills Sync
 Skills are discovered by searching for `SKILL.md` in the remote repository and copied into `<project>/copilot/skills/<skill-name>/`.
+The CLI also installs bundled lightweight skills from `skills/bundled/` by default.
 
 ## Notes
 - Requires Node.js (>=18) and `git` for full functionality (skills sync uses git).
