@@ -1,0 +1,31 @@
+{
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": true,
+    "markdown": true,
+    "scminput": false
+  },
+  "github.copilot.chat.trailingContext.enabled": true,
+  "github.copilot.editor.enableCodeActions": true,
+  "github.copilot.terminal.enable": true,
+  "github.copilot.chat.models": [
+    "gpt-4o",
+    "claude-3.5-sonnet",
+    "gemini-1.5-pro"
+  ],
+  "github.copilot.chat.defaultModel": "gpt-4o",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.fixAll.eslint": "always"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}

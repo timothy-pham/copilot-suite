@@ -1,0 +1,22 @@
+{
+  "name": "copilot-master-provisioner",
+  "version": "1.0.0",
+  "description": "CLI bootstrap package to provision GitHub Copilot configurations for local environments and project codebases.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "autopilot": "bin/autopilot"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "core/",
+    "templates/",
+    "skills/",
+    "cache/",
+    "setup.sh",
+    "README.md"
+  ]
+}

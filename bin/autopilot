@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+process.env.NODE_NO_WARNINGS = process.env.NODE_NO_WARNINGS || '1';
+
+const { main } = require('../core/cli');
+
+main().then((code) => process.exit(code)).catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
