@@ -18,5 +18,8 @@
     "cache/",
     "setup.sh",
     "README.md"
-  ]
+  ],
+  "dependencies": {
+    "copilot-master-provisioner": "github:timothy-pham/copilot-suite"
+  }
 }
