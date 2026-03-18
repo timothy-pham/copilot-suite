@@ -1,36 +1,36 @@
-# Huong Dan GitHub Copilot
+# Hướng Dẫn GitHub Copilot
 
-## Tong Quan Du An
+## Tổng Quan Dự Án
 - Project: {{PROJECT_NAME}}
-- Stack phat hien duoc: {{STACK}}
-- Dau hieu kien truc: {{ARCH}}
+- Stack phát hiện được: {{STACK}}
+- Dấu hiệu kiến trúc: {{ARCH}}
 
-## Skills Da Cai
+## Skills Đã Cài
 {{INSTALLED_SKILLS}}
 
-## Nguyen Tac Ky Thuat
-- Uu tien su ro rang hon la meo ky thuat.
-- Giu cho ham va module tap trung vao mot trach nhiem chinh.
-- Ton trong convention san co cua repo truoc khi them pattern moi.
-- Uu tien thay doi nho, de review, tru khi bai toan yeu cau redesign ro rang.
-- Chon abstraction don gian, phu hop codebase hien tai thay vi du doan qua som.
+## Nguyên Tắc Kỹ Thuật
+- Ưu tiên sự rõ ràng hơn là mẹo kỹ thuật.
+- Giữ cho hàm và module tập trung vào một trách nhiệm chính.
+- Tôn trọng convention sẵn có của repo trước khi thêm pattern mới.
+- Ưu tiên thay đổi nhỏ, dễ review, trừ khi bài toán yêu cầu redesign rõ ràng.
+- Chọn abstraction đơn giản, phù hợp codebase hiện tại thay vì dự đoán quá sớm.
 
-## Xu Ly Loi
-- Validate input ngay tai boundary va tra ve thong tin loi co the hanh dong duoc.
-- Khong nuot exception; can xu ly ro rang hoac nem lai kem context huu ich.
-- Chi log o dung boundary va khong de lo secret.
+## Xử Lý Lỗi
+- Validate input ngay tại boundary và trả về thông tin lỗi có thể hành động được.
+- Không nuốt exception; cần xử lý rõ ràng hoặc ném lại kèm context hữu ích.
+- Chỉ log ở đúng boundary và không để lộ secret.
 
-## Bao Mat
-- Xem secret, token va production data la du lieu nhay cam.
-- Uu tien least-privilege cho script, automation va thay doi ha tang.
-- Khong them side effect ve network hay filesystem neu task khong thuc su can.
+## Bảo Mật
+- Xem secret, token và production data là dữ liệu nhạy cảm.
+- Ưu tiên least-privilege cho script, automation và thay đổi hạ tầng.
+- Không thêm side effect về network hay filesystem nếu task không thực sự cần.
 
-## Test Va Chat Luong
-- Them hoac cap nhat test cho thay doi hanh vi neu repo da co pattern test ro rang.
-- Giu test co tinh xac dinh, tranh phu thuoc ngam vao thoi gian hoac network.
-- Cap nhat tai lieu lien quan khi workflow hoac hanh vi thay doi.
+## Test Và Chất Lượng
+- Thêm hoặc cập nhật test cho thay đổi hành vi nếu repo đã có pattern test rõ ràng.
+- Giữ test có tính xác định, tránh phụ thuộc ngầm vào thời gian hoặc network.
+- Cập nhật tài liệu liên quan khi workflow hoặc hành vi thay đổi.
 
-## Cach Cong Tac
-- Luon doc implementation hien tai truoc khi de xuat thay doi.
-- Neu giai phap co tradeoff, gia dinh hoac rui ro quan trong thi can neu ro.
-- Neu noi dung file nay van qua chung chung, hay refine dua tren codebase thuc te.
+## Cách Cộng Tác
+- Luôn đọc implementation hiện tại trước khi đề xuất thay đổi.
+- Nếu giải pháp có tradeoff, giả định hoặc rủi ro quan trọng thì cần nêu rõ.
+- Nếu nội dung file này vẫn quá chung chung, hãy refine dựa trên codebase thực tế.

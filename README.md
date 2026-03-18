@@ -1,28 +1,39 @@
 # copilot-suite
 
-CLI bootstrapper for generating project-scoped GitHub Copilot setup in one run:
+`copilot-suite` is a CLI bootstrapper for setting up project-scoped GitHub Copilot guidance in a single run.
+
+It helps a repository start with:
 
 - `.github/copilot-instructions.md`
 - `.github/skills/*`
-- an optional prompt file to help an agent refine the generated instructions against the real codebase
+- `.github/copilot-instructions.improve.prompt.md`
 
-## What Changed
+## Overview
 
-The autopilot flow now:
+The `autopilot` command guides the user through a lightweight setup flow:
 
-- asks the user to choose `English` or `Tiếng Việt` first
-- discovers skills from the two official repositories:
-  - [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main)
-  - [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills)
-- offers a recommended starter pack before showing the full discovered catalog
-- installs skills into `.github/skills`, which matches the current GitHub Copilot custom instructions and skills layout
-- writes a follow-up prompt to `.github/copilot-instructions.improve.prompt.md` and can copy that prompt to the clipboard in interactive mode
+- choose `English` or `Tiếng Việt`
+- detect the project stack and architecture signals
+- discover skills from the official repositories
+- offer a curated starter pack first
+- let the user install additional skills from the discovered catalog
+- generate a project-specific `copilot-instructions.md`
+- save a follow-up prompt that can be pasted into Copilot Chat to refine the instructions against the real codebase
 
-The recommended starter pack currently includes:
+Official skill sources:
+
+- [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main)
+- [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills)
+
+## Recommended Starter Pack
+
+The default starter pack includes:
 
 - `architecture-blueprint-generator`
 - `add-educational-comments`
 - `agentic-eval`
+
+This pack is intended to provide a practical baseline before the user browses the full skill catalog.
 
 ## Quick Start
 
@@ -40,7 +51,7 @@ npm install git+ssh://git@github.com:timothy-pham/copilot-suite.git
 npx copilot-suite --project /path/to/your/project
 ```
 
-Run directly from the repo:
+Run directly from the repository:
 
 ```bash
 ./bin/autopilot --project /path/to/your/project
@@ -52,22 +63,21 @@ Or use the helper script:
 ./setup.sh --project /path/to/your/project
 ```
 
-## Interactive Flow
+## Interactive Workflow
 
-`autopilot` now follows this order:
+During an interactive run, `autopilot` will:
 
-1. Choose language.
-2. Detect stack and architecture signals.
+1. Ask for the interface language.
+2. Inspect the target project to detect the stack and architecture hints.
 3. Sync the official skill sources.
-4. Offer the starter pack.
-5. Show the discovered skills catalog so the user can install additional skills.
-6. Update VS Code settings unless skipped.
-7. Generate `.github/copilot-instructions.md`.
-8. Offer a ready-to-paste prompt for improving `copilot-instructions.md` against the actual codebase.
+4. Offer the recommended starter pack.
+5. Show the discovered skills catalog for optional additional installs.
+6. Generate `.github/copilot-instructions.md`.
+7. Save `.github/copilot-instructions.improve.prompt.md` and optionally copy its content to the clipboard.
 
 In `--non-interactive` mode, the CLI:
 
-- uses `--lang` if provided, otherwise falls back to the OS locale
+- uses `--lang` when provided, otherwise falls back to the OS locale
 - installs the recommended starter pack automatically
 - skips additional skill selection
 - still writes the refinement prompt file
@@ -81,16 +91,15 @@ autopilot --help
 Common flags:
 
 - `--project <path>`: target project path.
-- `--lang <en|vi>`: choose CLI and generated instructions language.
-- `--skills-repo <url>`: add an extra skill repository on top of the two official sources. You can repeat this flag.
+- `--lang <en|vi>`: choose the CLI and generated instructions language.
+- `--skills-repo <url>`: add an extra skills repository on top of the official sources. This flag can be repeated.
 - `--skip-skills`: skip remote skill discovery and installation.
-- `--skip-vscode`: skip VS Code settings update.
 - `--state-path <path>`: override the checkpoint file path.
 - `--restart`: ignore a previous run and start fresh.
 - `--resume`: resume from the last checkpoint.
-- `--non-interactive`: accept defaults and install the starter pack automatically.
+- `--non-interactive`: run with defaults and install the starter pack automatically.
 
-## Output Layout
+## Generated Output
 
 After a successful run, the target project contains:
 
@@ -98,9 +107,14 @@ After a successful run, the target project contains:
 - `.github/copilot-instructions.improve.prompt.md`
 - `.github/skills/<source>--<skill>/...`
 
+## Requirements
+
+- Node.js `>=18`
+- `git` for syncing the official skill repositories
+
 ## Notes
 
-- Node.js `>=18` and `git` are required for full skill sync.
-- Skill discovery is based on finding `SKILL.md` in each configured source.
-- The generated `copilot-instructions.md` is intentionally a starting point. The follow-up prompt is there to help tailor it to the real repository.
-- A Vietnamese guide is available in [README.vi.md](./README.vi.md).
+- Skill discovery is based on locating `SKILL.md` in each configured source.
+- The generated `copilot-instructions.md` is a strong starting point, not a final repository audit.
+- The refinement prompt is designed to help a Copilot agent tailor the instructions to the actual codebase after the initial bootstrap.
+- Vietnamese documentation is available in [README.vi.md](./README.vi.md).

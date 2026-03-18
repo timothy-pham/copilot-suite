@@ -11,7 +11,7 @@ function replaceTokens(template, values) {
 
 function renderInstalledSkills(installedSkills, language) {
   if (!installedSkills || installedSkills.length === 0) {
-    return language === 'vi' ? '- Chua cai them skill nao.' : '- No additional skills installed yet.';
+    return language === 'vi' ? '- Chưa cài thêm skill nào.' : '- No additional skills installed yet.';
   }
 
   return installedSkills

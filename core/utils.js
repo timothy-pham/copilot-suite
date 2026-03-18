@@ -2,9 +2,87 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
-function printHeader(title) {
-  const line = '='.repeat(title.length);
-  console.log(`${title}\n${line}`);
+const COLOR = {
+  reset: '\x1b[0m',
+  bold: '\x1b[1m',
+  dim: '\x1b[2m',
+  cyan: '\x1b[36m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  red: '\x1b[31m',
+  blue: '\x1b[34m',
+  gray: '\x1b[90m',
+};
+
+function supportsColor() {
+  return Boolean(process.stdout.isTTY && !process.env.NO_COLOR);
+}
+
+function paint(text, ...codes) {
+  if (!supportsColor()) return String(text);
+  return `${codes.join('')}${text}${COLOR.reset}`;
+}
+
+function bold(text) {
+  return paint(text, COLOR.bold);
+}
+
+function dim(text) {
+  return paint(text, COLOR.dim);
+}
+
+function color(text, tone) {
+  return paint(text, COLOR[tone] || '', COLOR.bold);
+}
+
+function icon(name) {
+  const icons = {
+    section: '◆',
+    success: '✓',
+    warn: '⚠',
+    info: 'ℹ',
+    arrow: '→',
+    bullet: '•',
+    folder: '📁',
+    prompt: '✦',
+  };
+  return icons[name] || '•';
+}
+
+function printHeader(title, options = {}) {
+  const marker = options.icon || icon('section');
+  const tone = options.color || 'cyan';
+  const heading = `${marker} ${title}`;
+  const line = '─'.repeat(Math.max(title.length + 2, 24));
+  console.log(`\n${color(heading, tone)}\n${dim(line)}`);
+}
+
+function printMessage(kind, message) {
+  const toneMap = {
+    success: 'green',
+    warn: 'yellow',
+    error: 'red',
+    info: 'blue',
+  };
+  const iconMap = {
+    success: icon('success'),
+    warn: icon('warn'),
+    error: icon('warn'),
+    info: icon('info'),
+  };
+  console.log(`${color(iconMap[kind] || icon('bullet'), toneMap[kind] || 'blue')} ${message}`);
+}
+
+function printKeyValue(label, value) {
+  const left = `${bold(label)}${dim(' :')}`;
+  console.log(`  ${left} ${value}`);
+}
+
+function printListItem(text, options = {}) {
+  const marker = options.marker || icon('bullet');
+  const tone = options.color || null;
+  const renderedMarker = tone ? color(marker, tone) : marker;
+  console.log(`  ${renderedMarker} ${text}`);
 }
 
 function ask(question) {
@@ -210,7 +288,13 @@ function detectArchitectureFromDirs(dirnames) {
 }
 
 module.exports = {
+  bold,
+  color,
+  dim,
   printHeader,
+  printKeyValue,
+  printListItem,
+  printMessage,
   ask,
   confirm,
   ensureDir,

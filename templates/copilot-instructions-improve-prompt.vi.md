@@ -1,26 +1,26 @@
-Ban dang lam viec trong repository `{{PROJECT_NAME}}`.
+Bạn đang làm việc trong repository `{{PROJECT_NAME}}`.
 
-Nhiem vu cua ban la cai tien `{{INSTRUCTIONS_PATH}}` de noi dung phu hop voi codebase nay, khong con chung chung.
+Nhiệm vụ của bạn là cải tiến `{{INSTRUCTIONS_PATH}}` để nội dung phù hợp với codebase này, không còn chung chung.
 
-Thong tin da biet:
-- Stack phat hien duoc: {{STACK}}
-- Dau hieu kien truc: {{ARCH}}
-- Skills da cai:
+Thông tin đã biết:
+- Stack phát hiện được: {{STACK}}
+- Dấu hiệu kiến trúc: {{ARCH}}
+- Skills đã cài:
 {{INSTALLED_SKILLS}}
 
-Can thuc hien:
-1. Doc file `copilot-instructions.md` hien tai.
-2. Khao sat cac file dai dien trong repository de hieu kien truc, convention code, tooling, cach test va nhung khu vuc nhay cam.
-3. Chi ra nhung instruction hien tai dang qua chung chung, sai, trung lap, hoac con thieu.
-4. Viet lai `copilot-instructions.md` de agent sau nay co the su dung thuc te hon trong repo nay.
+Cần thực hiện:
+1. Đọc file `copilot-instructions.md` hiện tại.
+2. Khảo sát các file đại diện trong repository để hiểu kiến trúc, convention code, tooling, cách test và những khu vực nhạy cảm.
+3. Chỉ ra những instruction hiện tại đang quá chung chung, sai, trùng lặp, hoặc còn thiếu.
+4. Viết lại `copilot-instructions.md` để agent sau này có thể sử dụng thực tế hơn trong repo này.
 
-Yeu cau:
-- Giu file cuoi cung ngan gon, thuc dung.
-- Uu tien rule cu the theo repository thay vi best practice chung chung.
-- Neu ro framework, thu muc, workflow va convention test thuc su ton tai trong repo.
-- Giu lai cac huong dan hien tai neu chung van dung.
-- Khong tu dat ra cac rule kien truc neu codebase khong ho tro.
+Yêu cầu:
+- Giữ file cuối cùng ngắn gọn, thực dụng.
+- Ưu tiên rule cụ thể theo repository thay vì best practice chung chung.
+- Nêu rõ framework, thư mục, workflow và convention test thực sự tồn tại trong repo.
+- Giữ lại các hướng dẫn hiện tại nếu chúng vẫn đúng.
+- Không tự đặt ra các rule kiến trúc nếu codebase không hỗ trợ.
 
-Ket qua mong muon:
-- Chi cap nhat `{{INSTRUCTIONS_PATH}}`.
-- Sau khi sua xong, tom tat ngan gon ban da doi gi va vi sao.
+Kết quả mong muốn:
+- Chỉ cập nhật `{{INSTRUCTIONS_PATH}}`.
+- Sau khi sửa xong, tóm tắt ngắn gọn bạn đã đổi gì và vì sao.

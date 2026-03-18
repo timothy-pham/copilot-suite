@@ -10,15 +10,34 @@ const { buildSkillSources, getDefaultLanguage, resolveLanguage, STARTER_SKILL_PA
 const { detectArchitecture } = require('./scanner');
 const { discoverSkills, installSkills, syncSkillsRepo } = require('./skills');
 const { StateStore } = require('./state');
-const { ask, confirm, humanJoin, parseSelection, printHeader } = require('./utils');
-const { detectSettingsPath, updateSettings } = require('./vscode');
+const {
+  ask,
+  bold,
+  color,
+  confirm,
+  humanJoin,
+  parseSelection,
+  printHeader,
+  printKeyValue,
+  printListItem,
+  printMessage,
+} = require('./utils');
+
+function joinForDisplay(items, language) {
+  if (!items || items.length === 0) return '';
+  if (language === 'vi') {
+    if (items.length === 1) return items[0];
+    if (items.length === 2) return `${items[0]} và ${items[1]}`;
+    return `${items.slice(0, -1).join(', ')} và ${items[items.length - 1]}`;
+  }
+  return humanJoin(items);
+}
 
 function parseArgs(argv) {
   const args = {
     project: process.cwd(),
     skillsRepos: [],
     skipSkills: false,
-    skipVscode: false,
     statePath: null,
     restart: false,
     resume: false,
@@ -36,8 +55,6 @@ function parseArgs(argv) {
       i += 1;
     } else if (arg === '--skip-skills') {
       args.skipSkills = true;
-    } else if (arg === '--skip-vscode') {
-      args.skipVscode = true;
     } else if (arg === '--state-path') {
       args.statePath = argv[i + 1];
       i += 1;
@@ -59,14 +76,13 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log('Usage: autopilot [options]');
-  console.log('');
-  console.log('Options:');
+  printHeader('autopilot', { icon: '✦', color: 'cyan' });
+  console.log(`${bold('Usage')}  autopilot [options]\n`);
+  console.log(bold('Options'));
   console.log('  --project <path>        Path to target project (default: cwd)');
   console.log('  --skills-repo <url>     Add an extra skills repository on top of the official sources');
   console.log('  --lang <en|vi>          Choose CLI and instructions language');
   console.log('  --skip-skills           Skip skills sync/install');
-  console.log('  --skip-vscode           Skip VS Code settings update');
   console.log('  --state-path <path>     Override state file path');
   console.log('  --restart               Restart and ignore previous state');
   console.log('  --resume                Resume from previous state');
@@ -93,9 +109,9 @@ function confirmOptions(language, defaultYes = true) {
   if (language === 'vi') {
     return {
       defaultYes,
-      retryMessage: 'Vui long nhap y hoac n.',
-      yesValues: ['y', 'yes', 'c', 'co'],
-      noValues: ['n', 'no', 'k', 'khong'],
+      retryMessage: 'Vui lòng nhập y hoặc n.',
+      yesValues: ['y', 'yes', 'c', 'co', 'có'],
+      noValues: ['n', 'no', 'k', 'khong', 'không'],
     };
   }
 
@@ -116,7 +132,7 @@ async function selectLanguage(state, requestedLanguage, nonInteractive) {
   const fallbackLanguage = getDefaultLanguage();
   if (nonInteractive) return fallbackLanguage;
 
-  printHeader('Language / Ngon Ngu');
+  printHeader('Language / Ngôn Ngữ');
   const answer = await ask(t(fallbackLanguage, 'languagePrompt'));
   const selectedLanguage = resolveLanguage(answer);
   if (!selectedLanguage) {
@@ -148,29 +164,31 @@ async function promptResume(state, language, nonInteractive, forceRestart, force
 }
 
 function stepEnvCheck(state, language) {
-  printHeader(t(language, 'envCheck'));
-  console.log(t(language, 'nodeVersion', { value: process.version }));
+  printHeader(t(language, 'envCheck'), { icon: '⚙', color: 'blue' });
+  printKeyValue('Node', process.version);
   const { spawnSync } = require('child_process');
   const result = spawnSync('git', ['--version'], { stdio: 'ignore' });
   const gitAvailable = !result.error && result.status === 0;
-  console.log(
-    t(language, 'gitAvailable', {
-      value: gitAvailable ? t(language, 'gitAvailableYes') : t(language, 'gitAvailableNo'),
-    }),
-  );
+  printKeyValue('Git', gitAvailable ? t(language, 'gitAvailableYes') : t(language, 'gitAvailableNo'));
   state.setData('git_available', gitAvailable);
 }
 
 function stepStackDetect(state, projectPath, language) {
-  printHeader(t(language, 'stackDetection'));
+  printHeader(t(language, 'stackDetection'), { icon: '🧭', color: 'cyan' });
   const result = detectArchitecture(projectPath);
   state.setData('stack', result.stack);
   state.setData('patterns', result.patterns);
-  console.log(t(language, 'stackDetected', { value: humanJoin(result.stack) || t(language, 'unknownValue') }));
+  printKeyValue(
+    language === 'vi' ? 'Stack' : 'Stack',
+    joinForDisplay(result.stack, language) || t(language, 'unknownValue'),
+  );
   if (result.patterns.length) {
-    console.log(t(language, 'architectureSignals', { value: humanJoin(result.patterns) }));
+    printKeyValue(
+      language === 'vi' ? 'Kiến trúc' : 'Architecture',
+      joinForDisplay(result.patterns, language),
+    );
   } else {
-    console.log(t(language, 'architectureNone'));
+    printKeyValue(language === 'vi' ? 'Kiến trúc' : 'Architecture', t(language, 'unknownValue'));
   }
 }
 
@@ -187,28 +205,33 @@ function mergeInstalledSkills(...lists) {
 function printStarterPack(skills) {
   skills.forEach((skill, index) => {
     const details = skill.description ? ` - ${skill.description}` : '';
-    console.log(`${index + 1}. ${skill.name} [${skill.source.label}]${details}`);
+    printListItem(`${bold(`${index + 1}.`)} ${skill.name} ${color(`[${skill.source.label}]`, 'blue')}${details}`, {
+      marker: '★',
+      color: 'yellow',
+    });
   });
 }
 
 function printDiscoveredSkills(skills, installedIds, language) {
-  printHeader(t(language, 'availableSkills'));
+  printHeader(t(language, 'availableSkills'), { icon: '📁', color: 'cyan' });
   skills.forEach((skill, idx) => {
-    const installedTag = installedIds.has(skill.id) ? ' [installed]' : '';
+    const installedTag = installedIds.has(skill.id) ? ` [${t(language, 'installedTag')}]` : '';
     const details = skill.description ? ` - ${skill.description}` : '';
-    console.log(`${String(idx + 1).padStart(2, ' ')}. ${skill.name} [${skill.source.label}] (${skill.relpath})${details}${installedTag}`);
+    const index = String(idx + 1).padStart(2, ' ');
+    const installedLabel = installedTag ? color(installedTag, 'green') : '';
+    console.log(`  ${color(index, 'cyan')}. ${bold(skill.name)} ${color(`[${skill.source.label}]`, 'blue')} (${skill.relpath})${details}${installedLabel}`);
   });
 }
 
 async function stepSkills(state, projectPath, sources, cacheDir, language, nonInteractive, skip) {
-  printHeader(t(language, 'skillsSync'));
+  printHeader(t(language, 'skillsSync'), { icon: '📦', color: 'cyan' });
   if (skip) {
-    console.log(t(language, 'skillsSkipped'));
+    printMessage('warn', t(language, 'skillsSkipped'));
     return;
   }
 
   if (!state.getData('git_available', false)) {
-    console.log(t(language, 'skillsGitMissing'));
+    printMessage('warn', t(language, 'skillsGitMissing'));
     return;
   }
 
@@ -216,20 +239,20 @@ async function stepSkills(state, projectPath, sources, cacheDir, language, nonIn
   const sourceSummary = [];
 
   for (const source of sources) {
-    console.log(t(language, 'skillsRepoSyncing', { label: source.label }));
+    printMessage('info', t(language, 'skillsRepoSyncing', { label: source.label }));
     try {
       const repoPath = syncSkillsRepo(source, cacheDir);
       const sourceSkills = discoverSkills(repoPath, source);
       discoveredSkills.push(...sourceSkills);
       sourceSummary.push(`${source.label} (${sourceSkills.length})`);
-      console.log(t(language, 'skillsRepoSynced', { label: source.label, count: sourceSkills.length }));
+      printMessage('success', t(language, 'skillsRepoSynced', { label: source.label, count: sourceSkills.length }));
     } catch (err) {
-      console.log(t(language, 'skillsRepoFailed', { label: source.label, error: String(err.message || err) }));
+      printMessage('warn', t(language, 'skillsRepoFailed', { label: source.label, error: String(err.message || err) }));
     }
   }
 
   if (!discoveredSkills.length) {
-    console.log(t(language, 'skillsNoneFound'));
+    printMessage('warn', t(language, 'skillsNoneFound'));
     return;
   }
 
@@ -243,12 +266,12 @@ async function stepSkills(state, projectPath, sources, cacheDir, language, nonIn
     })),
   );
 
-  console.log(t(language, 'skillsSourceSummary', { value: sourceSummary.join(', ') }));
+  printKeyValue(language === 'vi' ? 'Nguồn' : 'Sources', sourceSummary.join(', '));
 
   const starterPackSkills = STARTER_SKILL_PACK.map((id) => discoveredSkills.find((skill) => skill.id === id)).filter(Boolean);
   let installedSkills = [];
 
-  printHeader(t(language, 'starterPackTitle'));
+  printHeader(t(language, 'starterPackTitle'), { icon: '★', color: 'yellow' });
   if (starterPackSkills.length === STARTER_SKILL_PACK.length) {
     printStarterPack(starterPackSkills);
     if (nonInteractive) {
@@ -257,31 +280,31 @@ async function stepSkills(state, projectPath, sources, cacheDir, language, nonIn
         starterPackSkills.map((skill) => skill.id),
         projectPath,
       );
-      console.log(t(language, 'starterPackDefault'));
+      printMessage('success', t(language, 'starterPackDefault'));
     } else if (await confirm(t(language, 'starterPackPrompt'), confirmOptions(language))) {
       installedSkills = installSkills(
         discoveredSkills,
         starterPackSkills.map((skill) => skill.id),
         projectPath,
       );
-      console.log(t(language, 'starterPackInstalled', { count: installedSkills.length }));
+      printMessage('success', t(language, 'starterPackInstalled', { count: installedSkills.length }));
     }
   } else {
-    console.log(t(language, 'starterPackUnavailable'));
+    printMessage('warn', t(language, 'starterPackUnavailable'));
   }
 
   const installedIds = new Set(installedSkills.map((skill) => skill.id));
   printDiscoveredSkills(discoveredSkills, installedIds, language);
 
   if (nonInteractive) {
-    console.log(t(language, 'additionalSkillsDefault'));
+    printMessage('info', t(language, 'additionalSkillsDefault'));
     state.setData('skills_installed', installedSkills);
     return;
   }
 
   const selection = (await ask(t(language, 'additionalSkillsPrompt'))).trim().toLowerCase();
   if (!selection) {
-    console.log(t(language, 'additionalSkillsSkipped'));
+    printMessage('info', t(language, 'additionalSkillsSkipped'));
     state.setData('skills_installed', installedSkills);
     return;
   }
@@ -293,7 +316,7 @@ async function stepSkills(state, projectPath, sources, cacheDir, language, nonIn
     try {
       selectedIndices = parseSelection(selection, discoveredSkills.length);
     } catch (_err) {
-      console.log(t(language, 'invalidSelection'));
+      printMessage('warn', t(language, 'invalidSelection'));
       state.setData('skills_installed', installedSkills);
       return;
     }
@@ -306,7 +329,7 @@ async function stepSkills(state, projectPath, sources, cacheDir, language, nonIn
     .filter((skillId) => !installedIds.has(skillId));
 
   if (!additionalIds.length) {
-    console.log(t(language, 'noValidSelections'));
+    printMessage('warn', t(language, 'noValidSelections'));
     state.setData('skills_installed', installedSkills);
     return;
   }
@@ -314,33 +337,17 @@ async function stepSkills(state, projectPath, sources, cacheDir, language, nonIn
   const additionalSkills = installSkills(discoveredSkills, additionalIds, projectPath);
   installedSkills = mergeInstalledSkills(installedSkills, additionalSkills);
   state.setData('skills_installed', installedSkills);
-  console.log(t(language, 'installedRemoteSkills', { count: additionalSkills.length }));
-}
-
-async function stepVscode(state, templatePath, language, nonInteractive, skip) {
-  printHeader(t(language, 'vscodeSettings'));
-  if (skip) {
-    console.log(t(language, 'vscodeSkipped'));
-    return;
-  }
-
-  const settingsPath = detectSettingsPath();
-  if (nonInteractive || (await confirm(t(language, 'vscodePrompt', { path: settingsPath }), confirmOptions(language)))) {
-    updateSettings(settingsPath, templatePath);
-    console.log(t(language, 'vscodeUpdated'));
-  } else {
-    console.log(t(language, 'vscodeSkipped'));
-  }
+  printMessage('success', t(language, 'installedRemoteSkills', { count: additionalSkills.length }));
 }
 
 async function stepInstructions(state, projectPath, instructionTemplatePath, promptTemplatePath, language, nonInteractive) {
-  printHeader(t(language, 'projectInstructions'));
+  printHeader(t(language, 'projectInstructions'), { icon: '📝', color: 'cyan' });
   const stack = state.getData('stack', []);
   const patterns = state.getData('patterns', []);
   const installedSkills = state.getData('skills_installed', []);
 
   const target = writeInstructions(projectPath, instructionTemplatePath, stack, patterns, installedSkills, language);
-  console.log(t(language, 'instructionsWritten', { path: target }));
+  printMessage('success', t(language, 'instructionsWritten', { path: target }));
 
   const promptContent = buildInstructionsRefinementPrompt(
     projectPath,
@@ -355,13 +362,14 @@ async function stepInstructions(state, projectPath, instructionTemplatePath, pro
   if (!nonInteractive && (await confirm(t(language, 'refinePromptCopy'), confirmOptions(language)))) {
     const clipboard = copyTextToClipboard(promptContent);
     if (clipboard.ok) {
-      console.log(t(language, 'refinePromptCopied', { tool: clipboard.tool }));
+      printMessage('success', t(language, 'refinePromptCopied', { tool: clipboard.tool }));
+      printMessage('info', t(language, 'refinePromptPasteHint'));
     } else {
-      console.log(t(language, 'refinePromptClipboardMissing'));
+      printMessage('warn', t(language, 'refinePromptClipboardMissing'));
     }
   }
 
-  console.log(t(language, 'refinePromptSaved', { path: promptPath }));
+  printMessage('info', t(language, 'refinePromptSaved', { path: promptPath }));
   state.setData('instructions_path', target);
   state.setData('instructions_refinement_prompt_path', promptPath);
 }
@@ -384,7 +392,7 @@ async function main() {
   const root = resolveRoot();
   const projectPath = path.resolve(args.project);
   if (!fs.existsSync(projectPath)) {
-    console.log(`Project path does not exist: ${projectPath}`);
+    printMessage('error', `Project path does not exist: ${projectPath}`);
     return 1;
   }
 
@@ -404,10 +412,6 @@ async function main() {
     [
       'skills_sync',
       () => stepSkills(state, projectPath, buildSkillSources(args.skillsRepos), cacheRoot, language, args.nonInteractive, args.skipSkills),
-    ],
-    [
-      'vscode_config',
-      () => stepVscode(state, path.join(root, 'templates', 'vscode-settings.json'), language, args.nonInteractive, args.skipVscode),
     ],
     [
       'instructions_generate',
@@ -433,7 +437,7 @@ async function main() {
 
   state.setStatus('complete');
   state.save();
-  console.log(`\n${t(language, 'autopilotComplete')}`);
+  printHeader(t(language, 'autopilotComplete'), { icon: '✓', color: 'green' });
   return 0;
 }
 
