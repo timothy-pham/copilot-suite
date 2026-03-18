@@ -1,5 +1,5 @@
 {
-  "name": "copilot-master-provisioner",
+  "name": "copilot-suite",
   "version": "1.0.0",
   "description": "CLI bootstrap package to provision GitHub Copilot configurations for local environments and project codebases.",
   "license": "MIT",

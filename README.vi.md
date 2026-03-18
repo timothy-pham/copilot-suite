@@ -1,4 +1,4 @@
-# copilot-master-provisioner
+# copilot-suite
 
 CLI bootstrap để tạo cấu hình GitHub Copilot theo từng project trong một lần chạy:
 
@@ -37,7 +37,7 @@ Cài local:
 
 ```bash
 npm install git+ssh://git@github.com:timothy-pham/copilot-suite.git
-npx copilot-master-provisioner --project /path/to/your/project
+npx copilot-suite --project /path/to/your/project
 ```
 
 Chạy trực tiếp trong repo:

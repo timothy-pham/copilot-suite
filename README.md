@@ -1,4 +1,4 @@
-# copilot-master-provisioner
+# copilot-suite
 
 CLI bootstrapper for generating project-scoped GitHub Copilot setup in one run:
 
@@ -37,7 +37,7 @@ Install locally:
 
 ```bash
 npm install git+ssh://git@github.com:timothy-pham/copilot-suite.git
-npx copilot-master-provisioner --project /path/to/your/project
+npx copilot-suite --project /path/to/your/project
 ```
 
 Run directly from the repo:
