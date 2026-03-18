@@ -1,6 +1,6 @@
 # copilot-suite
 
-`copilot-suite` is a CLI bootstrapper for setting up project-scoped GitHub Copilot guidance in a single run.
+`copilot-suite` is a CLI bootstrapper for setting up project-scoped GitHub Copilot (instructions, skills) guidance in a single run.
 
 It helps a repository start with:
 

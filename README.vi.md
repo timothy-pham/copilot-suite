@@ -1,6 +1,6 @@
 # copilot-suite
 
-`copilot-suite` là CLI bootstrap giúp thiết lập hướng dẫn GitHub Copilot theo từng project trong một lần chạy.
+`copilot-suite` là CLI bootstrap giúp thiết lập hướng dẫn GitHub Copilot (instructions, skills) theo từng project trong một lần chạy.
 
 Sau khi chạy `autopilot`, project có thể nhận được:
 
