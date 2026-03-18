@@ -41,6 +41,11 @@ Cài global:
 
 ```bash
 npm install -g git+ssh://git@github.com:timothy-pham/copilot-suite.git
+cd /path/to/your/project
+autopilot
+
+or
+
 autopilot --project /path/to/your/project
 ```
 

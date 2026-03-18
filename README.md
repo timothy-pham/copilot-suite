@@ -41,6 +41,11 @@ Install globally:
 
 ```bash
 npm install -g git+ssh://git@github.com:timothy-pham/copilot-suite.git
+cd /path/to/your/project
+autopilot
+
+or
+
 autopilot --project /path/to/your/project
 ```
 
@@ -48,7 +53,8 @@ Install locally:
 
 ```bash
 npm install git+ssh://git@github.com:timothy-pham/copilot-suite.git
-npx copilot-suite --project /path/to/your/project
+cd /path/to/your/project
+npx copilot-suite
 ```
 
 Run directly from the repository:
