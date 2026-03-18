@@ -1,56 +1,76 @@
 # copilot-master-provisioner
 
-Automated CLI-based bootstrap package to provision GitHub Copilot configurations for local environments (macOS/Linux) and specific project codebases.
+CLI bootstrapper for generating project-scoped GitHub Copilot setup in one run:
 
-## Features
+- `.github/copilot-instructions.md`
+- `.github/skills/*`
+- an optional prompt file to help an agent refine the generated instructions against the real codebase
 
-- Stateful CLI with checkpoint/resume via `cache/state.json`.
-- Tech stack and architecture discovery (heuristics).
-- Skill sync and install from `https://github.com/VoltAgent/awesome-agent-skills`.
-- System-wide VS Code settings hardening for Copilot + formatting best practices.
-- Project-level `.github/copilot-instructions.md` generation.
-- One-shot `setup.sh` for gh CLI, gh-copilot extension, aliases, and autopilot.
+## What Changed
+
+The autopilot flow now:
+
+- asks the user to choose `English` or `Tiếng Việt` first
+- discovers skills from the two official repositories:
+  - [github/awesome-copilot](https://github.com/github/awesome-copilot/tree/main)
+  - [anthropics/skills](https://github.com/anthropics/skills/tree/main/skills)
+- offers a recommended starter pack before showing the full discovered catalog
+- installs skills into `.github/skills`, which matches the current GitHub Copilot custom instructions and skills layout
+- writes a follow-up prompt to `.github/copilot-instructions.improve.prompt.md` and can copy that prompt to the clipboard in interactive mode
+
+The recommended starter pack currently includes:
+
+- `architecture-blueprint-generator`
+- `add-educational-comments`
+- `agentic-eval`
 
 ## Quick Start
 
-Install as an npm package (local or global), then run `autopilot`.
+Install globally:
 
 ```bash
 npm install -g git+ssh://git@github.com:timothy-pham/copilot-suite.git
-hoặc local:
-npm install git+ssh://git@github.com:timothy-pham/copilot-suite.git
 autopilot --project /path/to/your/project
 ```
 
-Or run locally with npx:
+Install locally:
 
 ```bash
+npm install git+ssh://git@github.com:timothy-pham/copilot-suite.git
 npx copilot-master-provisioner --project /path/to/your/project
 ```
 
-If you omit `--project`, it will use the current working directory:
+Run directly from the repo:
 
 ```bash
-npx copilot-master-provisioner
+./bin/autopilot --project /path/to/your/project
 ```
 
-Install directly from a private or SSH Git repo:
-
-```bash
-npm install -g git+ssh://git@github.com:timothy-pham/copilot-suite.git
-```
-
-You can also run the bundled setup script:
+Or use the helper script:
 
 ```bash
 ./setup.sh --project /path/to/your/project
 ```
 
-Or run the CLI directly:
+## Interactive Flow
 
-```bash
-./bin/autopilot --project /path/to/your/project
-```
+`autopilot` now follows this order:
+
+1. Choose language.
+2. Detect stack and architecture signals.
+3. Sync the official skill sources.
+4. Offer the starter pack.
+5. Show the discovered skills catalog so the user can install additional skills.
+6. Update VS Code settings unless skipped.
+7. Generate `.github/copilot-instructions.md`.
+8. Offer a ready-to-paste prompt for improving `copilot-instructions.md` against the actual codebase.
+
+In `--non-interactive` mode, the CLI:
+
+- uses `--lang` if provided, otherwise falls back to the OS locale
+- installs the recommended starter pack automatically
+- skips additional skill selection
+- still writes the refinement prompt file
 
 ## CLI Options
 
@@ -60,36 +80,27 @@ autopilot --help
 
 Common flags:
 
-- `--project`: target project path (default: current working directory).
-- `--skip-skills`: skip skills repo sync/install.
+- `--project <path>`: target project path.
+- `--lang <en|vi>`: choose CLI and generated instructions language.
+- `--skills-repo <url>`: add an extra skill repository on top of the two official sources. You can repeat this flag.
+- `--skip-skills`: skip remote skill discovery and installation.
 - `--skip-vscode`: skip VS Code settings update.
-- `--restart`: ignore prior state and run fresh.
-- `--resume`: resume if state exists.
-- `--non-interactive`: accept defaults (skips skill install prompt).
+- `--state-path <path>`: override the checkpoint file path.
+- `--restart`: ignore a previous run and start fresh.
+- `--resume`: resume from the last checkpoint.
+- `--non-interactive`: accept defaults and install the starter pack automatically.
 
-## Repository Structure
+## Output Layout
 
-- `bin/`: executable CLI entrypoint (`autopilot`).
-- `core/`: core modules (scanner, state, skills, VS Code, instructions).
-- `templates/`: instruction + settings templates.
-- `skills/`: reserved for future local skills.
-- `cache/`: state + synced skills repo cache.
+After a successful run, the target project contains:
 
-## State & Resume
-
-Progress is recorded in `cache/state.json`. If the process is interrupted, rerun `./bin/autopilot` and choose Resume or Restart.
-
-## VS Code Settings
-
-The CLI writes to the user-level `settings.json` (with a `.bak` backup). The settings include Copilot enablement, model defaults, and format-on-save rules. If your VS Code settings file uses comments (JSONC), it will be rewritten as JSON.
-
-## Skills Sync
-
-Skills are discovered by searching for `SKILL.md` in the remote repository and copied into `<project>/copilot/skills/<skill-name>/`.
-The CLI also installs bundled lightweight skills from `skills/bundled/` by default.
+- `.github/copilot-instructions.md`
+- `.github/copilot-instructions.improve.prompt.md`
+- `.github/skills/<source>--<skill>/...`
 
 ## Notes
 
-- Requires Node.js (>=18) and `git` for full functionality (skills sync uses git).
-- Stack and architecture detection is heuristic. Use the generated instructions as a starting point.
-- Copilot model settings vary by VS Code version. Adjust `templates/vscode-settings.json` if needed.
+- Node.js `>=18` and `git` are required for full skill sync.
+- Skill discovery is based on finding `SKILL.md` in each configured source.
+- The generated `copilot-instructions.md` is intentionally a starting point. The follow-up prompt is there to help tailor it to the real repository.
+- A Vietnamese guide is available in [README.vi.md](./README.vi.md).

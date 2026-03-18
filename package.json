@@ -15,11 +15,8 @@
     "core/",
     "templates/",
     "skills/",
-    "cache/",
     "setup.sh",
-    "README.md"
-  ],
-  "dependencies": {
-    "copilot-master-provisioner": "github:timothy-pham/copilot-suite"
-  }
+    "README.md",
+    "README.vi.md"
+  ]
 }

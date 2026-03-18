@@ -17,14 +17,18 @@ function ask(question) {
   });
 }
 
-async function confirm(prompt, defaultYes = true) {
-  const suffix = defaultYes ? '[Y/n]' : '[y/N]';
+async function confirm(prompt, options = {}) {
+  const defaultYes = options.defaultYes ?? true;
+  const suffix = options.suffix || (defaultYes ? '[Y/n]' : '[y/N]');
+  const yesValues = new Set((options.yesValues || ['y', 'yes', 'c', 'co']).map((value) => value.toLowerCase()));
+  const noValues = new Set((options.noValues || ['n', 'no', 'k', 'khong']).map((value) => value.toLowerCase()));
+  const retryMessage = options.retryMessage || 'Please enter y or n.';
   while (true) {
     const input = (await ask(`${prompt} ${suffix}: `)).trim().toLowerCase();
     if (!input) return defaultYes;
-    if (['y', 'yes'].includes(input)) return true;
-    if (['n', 'no'].includes(input)) return false;
-    console.log('Please enter y or n.');
+    if (yesValues.has(input)) return true;
+    if (noValues.has(input)) return false;
+    console.log(retryMessage);
   }
 }
 
